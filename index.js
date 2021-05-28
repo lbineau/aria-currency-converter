@@ -45,13 +45,15 @@ client.on('message', function (message) {
     `)
     return
   }
-  const regex = /(^\d+)(PO|PA|PC|PF)(PO|PA|PC|PF)/gm
+  const regex = /(^\d+)(PO|PA|PC|PF)(PO|PA|PC|PF)/gmi
   const args = regex.exec(commandBody)
 
   if (!args) return
 
-  const [match, amount, from, to] = args
-  const convertion = math.evaluate(`${amount} ${from} to ${to}`)
+  let [match, amount, from, to] = args
+  from = from.toUpperCase()
+  to = to.toUpperCase()
+  convertion = math.evaluate(`${amount} ${from} to ${to}`)
 
   if (math.isInteger(convertion.toNumeric())) {
     message.reply(formatResponseMessage(convertion, amount, from))
