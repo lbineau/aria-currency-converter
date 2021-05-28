@@ -13,20 +13,18 @@ math.createUnit({
   PO: '1000 PF'
 })
 
+function formatResponseMessage (result, amount, from) {
+  return `\`\`\`${amount} ${from}: ${result}\`\`\``
+}
+
 function calculateRoundNumbers (amount, from, to) {
   const ORDER = ['PO', 'PA', 'PC', 'PF']
   const PF = math.evaluate(`${amount} ${from} to PF`)
-  const split = PF.splitUnit(ORDER)
-  let shouldStop = false;
-  const splitToReturn = split.filter((item, index) => {
-    if (shouldStop) return false;
-    if (index >= ORDER.indexOf(to)) {
-      if (item.toNumeric() != 0) shouldStop = true
-      return true
-    }
-    return false
+  const ORDER_TO_SPLIT = ORDER.filter((item, index) => {
+    return (index >= ORDER.indexOf(to) && index <= ORDER.indexOf(from))
   })
-  return splitToReturn
+  const split = PF.splitUnit(ORDER_TO_SPLIT)
+  return split
 }
 
 client.on('message', function (message) {
@@ -47,21 +45,18 @@ client.on('message', function (message) {
     `)
     return
   }
-  // const args = commandBody.split(' ');
   const regex = /(^\d+)(PO|PA|PC|PF)(PO|PA|PC|PF)/gm
   const args = regex.exec(commandBody)
-  // const command = args.shift().toLowerCase();
+
+  if (!args) return
+
   const [match, amount, from, to] = args
-  const toPF = math.evaluate(`${amount} ${from} to PF`)
-  const toPC = math.evaluate(`${amount} ${from} to PC`)
-  const toPA = math.evaluate(`${amount} ${from} to PA`)
-  const toPO = math.evaluate(`${amount} ${from} to PO`)
   const convertion = math.evaluate(`${amount} ${from} to ${to}`)
 
   if (math.isInteger(convertion.toNumeric())) {
-    message.reply(`Convertion: ${convertion}`)
+    message.reply(formatResponseMessage(convertion, amount, from))
   } else {
-    message.reply(`Convertion: ${calculateRoundNumbers(amount, from, to)}`)
+    message.reply(formatResponseMessage(calculateRoundNumbers(amount, from, to), amount, from))
   }
 })
 
