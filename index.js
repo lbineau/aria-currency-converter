@@ -14,7 +14,9 @@ math.createUnit({
 })
 
 function formatResponseMessage (result, amount, from) {
-  return `\`\`\`${amount} ${from}: ${result}\`\`\``
+  const formattedResult = math.format(result, { notation: 'fixed' })
+  const ouputResult = formattedResult.replace('[', '').replace(']', '')
+  return `\`\`\`${amount} ${from}: ${ouputResult}\`\`\``
 }
 
 function calculateRoundNumbers (amount, from, to) {
